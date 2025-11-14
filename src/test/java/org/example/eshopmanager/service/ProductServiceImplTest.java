@@ -11,8 +11,7 @@ import org.mockito.Mockito;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.never;
@@ -31,8 +30,8 @@ class ProductServiceImplTest {
     @Test
     void getAll_ReturnsAllProducts() {
         final var products = List.of(
-                new Product(1L, "P1", 10d, 100, 0),
-                new Product(2L, "P2", 20d, 100, 0)
+                new Product(1L, "P1", 10d, 100, 0, null, 0),
+                new Product(2L, "P2", 20d, 100, 0, null, 0)
         );
 
         when(productRepository.findAll()).thenReturn(products);
@@ -45,7 +44,7 @@ class ProductServiceImplTest {
 
     @Test
     void getProduct_WhenExists_ReturnsProduct() {
-        final var p = new Product(1L, "P1", 10d, 100, 0);
+        final var p = new Product(1L, "P1", 10d, 100, 0, null, 0);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(p));
 
@@ -66,7 +65,7 @@ class ProductServiceImplTest {
 
     @Test
     void refill_IncreasesStock() {
-        final var p = new Product(1L, "P1", 10d, 100, 0);
+        final var p = new Product(1L, "P1", 10d, 100, 0, null, 0);
         when(productRepository.findById(1L)).thenReturn(Optional.of(p));
         when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -78,7 +77,7 @@ class ProductServiceImplTest {
 
     @Test
     void buy_DecreasesStock() {
-        final var p = new Product(1L, "P1", 10d, 100, 0);
+        final var p = new Product(1L, "P1", 10d, 100, 0, null, 0);
         when(productRepository.findById(1L)).thenReturn(Optional.of(p));
         when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -90,7 +89,7 @@ class ProductServiceImplTest {
 
     @Test
     void buy_WhenNotEnoughStock_ThrowsException() {
-        final var p = new Product(1L, "P1", 2d, 100, 0);
+        final var p = new Product(1L, "P1", 2d, 100, 0, null, 0);
         when(productRepository.findById(1L)).thenReturn(Optional.of(p));
 
         assertThrows(NotEnoughStockException.class,
@@ -101,11 +100,45 @@ class ProductServiceImplTest {
 
     @Test
     void getStock_ReturnsCorrectValue() {
-        final var p = new Product(1L, "P1", 10d, 100, 0);
+        final var p = new Product(1L, "P1", 10d, 100, 0, null, 0);
         when(productRepository.findById(1L)).thenReturn(Optional.of(p));
 
         final var stock = productServiceImpl.getProductStock(1L);
 
         assertEquals(100, stock.get("P1"));
+    }
+
+    @Test
+    void reserve_IncreasesReservedStock() {
+        final var p = new Product(1L, "P1", 10.0, 100, 0, null, 0);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(p));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        final var result = productServiceImpl.reserve(1L, 5);
+
+        assertEquals(5, result.getReservedStock());
+        assertNotNull(result.getReservationExpiry());
+        verify(productRepository).save(p);
+    }
+
+    @Test
+    void reserve_WhenAmountExceedsAvailableStock_ThrowsException() {
+        final var p = new Product(1L, "P1", 10.0, 100, 5, null, 0); // available = 2
+        when(productRepository.findById(1L)).thenReturn(Optional.of(p));
+
+        assertThrows(NotEnoughStockException.class, () -> productServiceImpl.reserve(1L, 100));
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test
+    void reserve_AddsReservedStockWithoutAffectingTotalStock() {
+        final var p = new Product(1L, "P1", 15d, 100, 0, null, 0);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(p));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        final var result = productServiceImpl.reserve(1L, 5);
+
+        assertEquals(5, result.getReservedStock());
+        assertEquals(100, result.getStock());
     }
 }
