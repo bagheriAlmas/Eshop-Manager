@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "products")
 @Getter
@@ -25,6 +27,12 @@ public class Product {
 
     @Column(name = "stock", nullable = false)
     private Integer stock = 100;
+
+    @Column(name = "reserved_stock", nullable = false)
+    private Integer reservedStock = 0;
+
+    @Column(name = "reservation_expiry")
+    private LocalDateTime reservationExpiry;
 
     @Version
     private Integer version;
