@@ -1,46 +1,16 @@
 package org.example.eshopmanager.service;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.example.eshopmanager.entity.Product;
-import org.example.eshopmanager.exception.NotEnoughStockException;
-import org.example.eshopmanager.exception.ProductNotFoundException;
-import org.example.eshopmanager.repository.ProductRepository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class ProductService {
+public interface ProductService {
 
-    private final ProductRepository productRepository;
+    List<Product> getAll();
 
-    public List<Product> getAll() {
-        return productRepository.findAll();
-    }
+    Product getProduct(Long id);
 
-    public Product getProduct(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
-    }
+    Product buy(Long id, int amount);
 
-    @Transactional
-    public Product buy(Long id, int amount) {
-        final var product = getProduct(id);
-
-        if (product.getStock() < amount)
-            throw new NotEnoughStockException(amount, product.getStock());
-
-        product.setStock(product.getStock() - amount);
-
-        return productRepository.save(product);
-    }
-
-    @Transactional
-    public Product refill(Long id, int amount) {
-        final var product = getProduct(id);
-        product.setStock(product.getStock() + amount);
-        return productRepository.save(product);
-    }
+    Product refill(Long id, int amount);
 }
