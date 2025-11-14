@@ -106,6 +106,6 @@ class ProductServiceImplTest {
 
         final var stock = productServiceImpl.getProductStock(1L);
 
-        assertEquals(100, stock);
+        assertEquals(100, stock.get("P1"));
     }
 }

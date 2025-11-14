@@ -8,11 +8,13 @@ import org.example.eshopmanager.exception.ProductNotFoundException;
 import org.example.eshopmanager.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
- class ProductServiceImpl implements ProductService {
+class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
@@ -25,8 +27,9 @@ import java.util.List;
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
-    public Integer getProductStock(Long id) {
-        return getProduct(id).getStock();
+    public Map<String, Integer> getProductStock(Long productId) {
+        final var product = getProduct(productId);
+        return Collections.singletonMap(product.getName(), product.getStock());
     }
 
     @Transactional
