@@ -3,6 +3,8 @@ package org.example.eshopmanager.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.eshopmanager.entity.Product;
+import org.example.eshopmanager.exception.NotEnoughStockException;
+import org.example.eshopmanager.exception.ProductNotFoundException;
 import org.example.eshopmanager.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,7 @@ public class ProductService {
 
     public Product getProduct(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("product not found"));
+                .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Transactional
@@ -28,7 +30,7 @@ public class ProductService {
         final var product = getProduct(id);
 
         if (product.getStock() < amount)
-            throw new RuntimeException("product not enough");
+            throw new NotEnoughStockException(amount, product.getStock());
 
         product.setStock(product.getStock() - amount);
 
