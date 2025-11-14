@@ -11,9 +11,11 @@ public interface ProductService {
 
     Product getProduct(Long id);
 
-    Map<String ,Integer> getProductStock(Long id);
+    Map<String, Integer> getProductStock(Long id);
 
     Product buy(Long id, int amount);
 
     Product refill(Long id, int amount);
+
+    Product reserve(Long id, int amount);
 }

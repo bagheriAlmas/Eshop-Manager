@@ -41,4 +41,9 @@ public class ProductController {
     public ResponseEntity<Product> buyProduct(@PathVariable Long id, @RequestParam int amount) {
         return ResponseEntity.ok(productService.buy(id, amount));
     }
+
+    @PostMapping("/{id}/reserve")
+    public ResponseEntity<Product> reserveProduct(@PathVariable Long id, @RequestParam int amount) {
+        return ResponseEntity.ok(productService.reserve(id, amount));
+    }
 }
