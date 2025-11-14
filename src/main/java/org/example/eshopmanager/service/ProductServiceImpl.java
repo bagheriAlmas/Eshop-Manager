@@ -25,6 +25,10 @@ import java.util.List;
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
+    public Integer getProductStock(Long id) {
+        return getProduct(id).getStock();
+    }
+
     @Transactional
     public Product buy(Long id, int amount) {
         final var product = getProduct(id);

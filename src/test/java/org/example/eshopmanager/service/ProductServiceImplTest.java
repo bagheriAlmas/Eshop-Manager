@@ -98,4 +98,14 @@ class ProductServiceImplTest {
 
         verify(productRepository, never()).save(any());
     }
+
+    @Test
+    void getStock_ReturnsCorrectValue() {
+        final var p = new Product(1L, "P1", 10d, 100, 0);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(p));
+
+        final var stock = productServiceImpl.getProductStock(1L);
+
+        assertEquals(100, stock);
+    }
 }

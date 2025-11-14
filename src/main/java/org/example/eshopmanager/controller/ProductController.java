@@ -26,6 +26,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProduct(id));
     }
 
+    @GetMapping("/{id}/stock")
+    public ResponseEntity<Integer> getStock(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductStock(id));
+    }
+
     @PostMapping("/{id}/refill")
     public ResponseEntity<Product> refillStock(@PathVariable Long id, @RequestParam int amount) {
         return ResponseEntity.ok(productService.refill(id, amount));
